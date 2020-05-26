@@ -1,0 +1,42 @@
+#!/bin/bash
+
+function cueSong {
+	mpc listall | dmenu -i -l 10 | mpc insert
+}
+
+function cueAlbum {
+	mpc clear
+	mpc random off
+	mpc findadd album "$(mpc list album | dmenu -i -l 10)"
+	mpc play
+}
+
+function cuePlaylist {
+	mpc clear
+	mpc random on
+	mpc load "$(mpc lsplaylists | dmenu -i -l 10)"
+	mpc play
+}
+
+function add2playlist {
+	echo "~/Music/$(mpc -f %file% current)">>~/Music/playlists/$(mpc lsplaylists | dmenu -i).m3u
+}
+
+function reroll {
+	mpc clear
+	mpc add /
+	mpc shuffle
+	mpc play
+}
+
+function bg {
+	IFS=$'\n';
+	songpath="$(mpc --format %file% | head -n 1)"
+	artpath=~/Music/$(dirname $songpath)/artwork.jpg
+	mogrify -resize 1366x -crop 1366x768 $artpath > /dev/null 2>&1
+	rm ~/Music/$(dirname $songpath)/artwork-1.jpg > /dev/null 2>&1
+	newpath=~/Music/$(dirname $songpath)/artwork-0.jpg
+	exec nitrogen --set-auto $newpath > /dev/null 2>&1
+}
+
+$*;
